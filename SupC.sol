@@ -192,18 +192,24 @@ contract Chain is AccessControl{
     
     //Function to send and receive shipments
     function sendShipment(
-        uint trackingNo, 
-        uint upc, 
-        uint quantity, 
-        uint leadTime
+        uint _trackingNo, 
+        uint _upc, 
+        uint _quantity, 
+        uint _leadTime
         ) public payable onlyStakeholder returns (bool success) {
         // Function for manufacturer to send a shipment of _quanity number of _upc
         // Fill out shipment struct for a given tracking number
-        _shipments[trackingNo].upc       = upc;
-        _shipments[trackingNo].sender    = payable(msg.sender);
-        _shipments[trackingNo].quantity  = quantity;
-        _shipments[trackingNo].timeStamp = block.timestamp;
-        _shipments[trackingNo].contractLeadTime = leadTime;
+        shipment memory newShipment = shipment({
+        
+            upc: _upc,                           // Item(s) identifier
+            quantity: _quantity,                 // Number of items in the shipment
+            timeStamp: block.timestamp,          // Will be used to define when shipment is sent
+            sender: payable(msg.sender);         // ETH Address of the sender
+            contractLeadTime: _leadTime          // Predetermined allowable timeframe for delivery
+        })
+
+        _shipments[trackingNo] = newShipment;
+
         // emit successful event
         emit ShippingSuccess("Items Shipped", trackingNo, block.timestamp, msg.sender);
         return true;
